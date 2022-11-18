@@ -13,7 +13,18 @@ services:
       - .docker/nginx:/etc/nginx/conf.d
     networks:
       app-network:
-
+  node:
+    image: node
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: .docker/node/Dockerfile
+      args:
+        VUE_APP_API_URL: http://localhost:9000
+    ports:
+      - "9000:80"
+    depends_on:
+      - php
   php:
     build:
       context: .docker/php
@@ -23,6 +34,8 @@ services:
       - .docker/php/php.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       app-network:
+    depends_on:
+      - mysql
 
   mysql:
     image: mysql:8.0
@@ -53,6 +66,8 @@ services:
     restart: always
     ports:
       - 8081:80
+    depends_on:
+      - mysql
 
 networks:
   app-network:
